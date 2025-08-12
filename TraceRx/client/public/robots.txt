@@ -1,0 +1,4 @@
+// Allows web crawlers to 'crawl' all the pages in my React app.
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow:
