@@ -49,8 +49,8 @@
 
 <table>
 <tr>
-<td width="75%"><img src="architecture.png" alt="Architecture Diagram"/></td>
-<td width="45%">
+<td width="65%"><img src="architecture.png" alt="Architecture Diagram"/></td>
+<td width="35%">
 
 **How it fits together**  
 
