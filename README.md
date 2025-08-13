@@ -1,219 +1,180 @@
-# TraceRx
+<p align="center">
+  <img src="TraceRx/client/public/512x512Logo.png" alt="TraceRx Logo" width="140"/>
+</p>
 
-TraceRx is a minimal end-to-end pharma supply chain demo that records batch orders and role-based handoffs on Ethereum. It focuses on clarity: simple roles, explicit stage transitions, and UI feedback that mirrors on-chain rules.
+<h1 align="center">TraceRx</h1>
 
----
-
-## What’s inside
-
-- **Smart contract:** `PharmaSupplyChain.sol` (single owner; role registries; stage-gated batch flow)
-- **Frontend:** React (Create React App), React Router (v5), Web3.js, MetaMask
-- **Tooling:** Truffle for compile/deploy; JSON artifacts consumed by the client
+<p align="center">
+  <i>Blockchain-powered, end-to-end tracking of pharmaceutical batches — simple roles, explicit stage gates, and clear UI feedback.</i>
+</p>
 
 ---
 
-## Core concepts
+## 🚀 Technology Stack
 
-### Roles
-- **Owner (admin):** the deployer; can add roles and create batch orders.
-- **RMS / Manufacturer / Distributor / Retailer:** accounts registered by the owner.
-  - Each step can be executed only by the corresponding registered role.
-
-### Batch lifecycle (stages)
-`Init → RawMaterialSupply → Manufacture → Distribution → Retail → sold`
-
-Transitions:
-- `RMSsupply(id)` from `Init`
-- `Manufacturing(id)` from `RawMaterialSupply`
-- `Distribute(id)` from `Manufacture`
-- `Retail(id)` from `Distribution`
-- `sold(id)` only by the **assigned Retailer** from `Retail`
-
-### On-chain data model (simplified)
-- `MedicineStock[id]` → `{ id, name, description, RMSid, MANid, DISid, RETid, stage }`
-- Role registries: `RMS`, `MAN`, `DIS`, `RET` (each stores `{ addr, id, name, place }`)
-- Counters: `medicineCtr`, `rmsCtr`, `manCtr`, `disCtr`, `retCtr`
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML5" width="44"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS3" width="44"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" width="44"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" width="44"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/solidity/solidity-original.svg" alt="Solidity" width="44"/>
+  <img src="https://raw.githubusercontent.com/web3/web3.js/1.x/assets/logo/web3js.jpg" alt="Web3.js" width="44"/>
+  <img src="https://trufflesuite.com/img/truffle-logo-dark.svg" alt="Truffle" width="44"/>
+  <img src="https://images.ctfassets.net/clixtyxoaeas/4rnpEzy1ATWRKVBOLxZ1Fm/a74dc1eed36d23d7ea6030383a4d5163/MetaMask-icon-fox.svg" alt="MetaMask" width="44"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg" alt="Ethereum" width="30"/>
+</p>
 
 ---
 
-## App structure (client)
+## 📜 Description
 
-- **Home** — entry screen, connect/status, quick actions
-- **RegisterRoles** — owner registers RMS/MAN/DIS/RET
-- **CreateBatchOrder** — owner creates medicine batch orders
-- **ProcessBatches** — role actions to advance stage (RMS → MAN → DIS → RET → Sold)
-- **TrackBatch** — read-only tracking / status table
+**What It Is:** TraceRx is a **blockchain-based supply chain system** for pharma batches.
 
-Shared utilities:
-- `src/artifacts/PharmaSupplyChain.json` — ABI + deployed address per network id
-- `src/txError.js` — extracts revert messages and shows friendly alerts
-- Global Web3 setup enables `web3.eth.handleRevert = true` for readable errors
+**What It Does:** Every handoff — from **Raw Material Supplier → Manufacturer → Distributor → Retailer → Sold** — is recorded on-chain.
+
+**What That Means:** fewer manual reconciliations, **tamper-evident** history, and a single verifiable source of truth for all participants.
 
 ---
 
-## Diagrams
+## 🎯 Core Features
 
-### System / Data Flow
-```mermaid
-flowchart LR
-  user[User] --> ui[TraceRx React SPA]
-  ui --> web3[web3.js]
-  web3 --> mm[MetaMask Provider]
-  mm --> node[(Ethereum Node)]
-  node <--> sc[PharmaSupplyChain.sol]
+- **Role registries** (Owner, RMS, MAN, DIS, RET) with access control.
+- **Stage-gated lifecycle** (`Init → RawMaterialSupply → Manufacture → Distribution → Retail → Sold`).
+- **Readable errors** in the UI mirroring contract revert reasons.
+- **React SPA** with MetaMask integration and straightforward UX.
 
-  subgraph On-chain State
-    sc --> ms[(MedicineStock)]
-    sc --> roles[(RMS, MAN, DIS, RET)]
-    sc --> ctrs[(Counters)]
-  end
+---
+
+## 🏗 Architecture (at a glance)
+
+<table>
+<tr>
+<td width="75%"><img src="architecture.png" alt="Architecture Diagram"/></td>
+<td width="45%">
+
+**How it fits together**  
+
+- **Smart Contract (Solidity)**: Owns the truth. Stores role registries and `MedicineStock` with current stage. Enforces who can do what, when.  
+- **Web3/MetaMask**: The bridge. Signs transactions and connects the React app to your Ethereum node (local Ganache/Hardhat or a testnet).  
+- **React Client**: Clean pages for role registration, batch creation, stage progression, and tracking. Reads ABI + address from `client/src/artifacts/PharmaSupplyChain.json`.  
+- **Truffle**: Compile/deploy tooling. Produces JSON artifacts used by the client.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🔄 Supply Chain Flow (business view)
+
+<table>
+<tr>
+<td width="55%"><img src="supply_chain.png" alt="Supply Chain Flow"/></td>
+<td width="45%">
+
+**Stages & Who Acts**  
+
+1. **Init** — Batch is created by **Owner**.  
+2. **Raw Material Supply** — Set by **RMS** via `RMSsupply(id)`.  
+3. **Manufacture** — Set by **MAN** via `Manufacturing(id)`.  
+4. **Distribution** — Set by **DIS** via `Distribute(id)`.  
+5. **Retail** — Set by **RET** via `Retail(id)`.  
+6. **Sold** — Finalize by **assigned RET** via `sold(id)`.  
+
+Each step checks the caller’s role and the current stage before moving forward.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🧩 Methodology — Running TraceRx Locally
+
+Follow these steps exactly to run **TraceRx** on your machine.
+
+### 1️⃣ Requirements
+
+- **Node.js** (LTS recommended) + **npm**
+- **Truffle**: `npm install -g truffle`
+- **Ganache** (GUI or CLI) **OR** Hardhat for local blockchain
+- **MetaMask** browser extension
+- Git (recommended)
+
+---
+
+### 2️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/AbdurRafey237/TraceRx.git
+cd TraceRx
 ```
 
-### Frontend modules
-```mermaid
-graph TB
-  App[App.js Router] --> Home
-  App --> RegisterRoles
-  App --> CreateBatchOrder
-  App --> ProcessBatches
-  App --> TrackBatch
-
-  subgraph Shared
-    artifacts[artifacts/PharmaSupplyChain.json]
-    txerr[txError.js]
-    styles[*.css]
-  end
-
-  RegisterRoles --- artifacts
-  CreateBatchOrder --- artifacts
-  ProcessBatches --- artifacts
-  TrackBatch --- artifacts
-
-  RegisterRoles --- txerr
-  CreateBatchOrder --- txerr
-  ProcessBatches --- txerr
-```
-
 ---
 
-## Getting started
+### 3️⃣ Install Dependencies
 
-### 1) Prerequisites
-- Node.js (LTS)
-- Truffle
-- A local Ethereum node (e.g., Ganache/Hardhat) or a testnet RPC
-- MetaMask in the browser
-
-### 2) Install dependencies
-From the project root:
 ```bash
 npm install
-```
-Client app:
-```bash
 cd client
 npm install
+cd ..
 ```
 
-### 3) Compile & deploy the contract
-From the project root:
+---
+
+### 4️⃣ Start Local Blockchain
+
+Using **Ganache**:
+1. Open Ganache GUI or run `ganache-cli --chainId 1337`.
+2. Make sure MetaMask is connected to `http://127.0.0.1:7545` or `8545`.
+
+Using **Hardhat**:
+```bash
+npx hardhat node
+```
+
+---
+
+### 5️⃣ Deploy Contracts
+
 ```bash
 truffle compile
-truffle migrate --reset
-```
-> Tip: In `truffle-config.js`, using `network_id: "*"` for a local network avoids 5777/1337 mismatches.
-
-After deploy, ensure the generated `build/contracts/PharmaSupplyChain.json` is available to the client (copy or point) as:
-```
-client/src/artifacts/PharmaSupplyChain.json
+truffle migrate
 ```
 
-### 4) Run the client
+---
+
+### 6️⃣ Run the Frontend
+
 ```bash
 cd client
+npm i
+npm install -save web3
+npm
 npm start
 ```
-Open the app in a browser and connect MetaMask to the same network used in step 3.
+
+Visit: `http://localhost:3000`
 
 ---
 
-## Using the app (happy path)
+### 7️⃣ Connect MetaMask
 
-1. **Connect wallet** (the app attempts silent connect, then prompts).
-2. **Register roles** (Owner only): add at least one RMS, Manufacturer, Distributor, Retailer.
-3. **Create batch order** (Owner only): set batch name/notes; stage becomes `Init`.
-4. **Process batches**:
-   - RMS calls `RMSsupply` (Init → RawMaterialSupply)
-   - MAN calls `Manufacturing` (→ Manufacture)
-   - DIS calls `Distribute` (→ Distribution)
-   - RET calls `Retail` (→ Retail)
-   - Assigned RET calls `sold` (→ sold)
-5. **Track**: view batches and their current stage.
+- Import one of the Ganache accounts into MetaMask.
+- Switch to the same network (localhost).
+- Interact with the dApp.
 
 ---
 
-## Error messages (what you’ll see)
+## 📌 Pro Tips
 
-- Contract reverts surface directly (e.g., **“Owner only.”**, **“Caller not a registered manufacturer.”**, **“Batch not at manufacturing stage.”**).
-- User cancels in MetaMask → **“Transaction rejected in MetaMask.”**
-- Input guards catch obvious issues (e.g., non-numeric batch ID).
-
-This is powered by `web3.eth.handleRevert = true`, a preflight `.call()` before `.send()`, and `txError.js` to extract revert reasons.
+- Always clear browser cache after redeploying contracts.
+- Use `.env` for sensitive configs.
+- For testnet deployment, update `truffle-config.js` with Infura/Alchemy RPC and private key.
 
 ---
 
-## Network switching tips
+## 📄 License
 
-- If you change chain/network, **re-deploy** and make sure the client’s artifact JSON contains an entry for that **network id**. The UI looks up:
-  ```
-  SupplyChainABI.networks[networkId].address
-  ```
-- If you see **“The smart contract is not deployed to the current network”**, you’re on a different network id than the artifact contains—migrate again and restart the client.
-
----
-
-## Troubleshooting
-
-- **MetaMask shows “Internal JSON-RPC error”**  
-  Your revert reason is nested; the client’s `txError.js` will unwrap it.
-
-- **Owner-only actions fail**  
-  Confirm the connected account equals the contract’s `Owner`.
-
-- **Role step fails**  
-  Ensure the connected wallet is registered for that role and the batch is at the previous stage.
-
-- **Title/manifest issues**  
-  The app title comes from `public/index.html`. If installed as a PWA, the window title may combine the manifest `name` and the document title. Clear site data or reinstall the app if cached.
-
----
-
-## Project layout (reference)
-
-```
-contracts/
-  PharmaSupplyChain.sol
-  Migrations.sol
-migrations/
-  1_initial_migration.js
-  2_deploy_contracts.js
-client/
-  public/
-    index.html
-    manifest.json
-    favicon / icons
-  src/
-    App.js
-    Home.js
-    RegisterRoles.js
-    CreateBatchOrder.js
-    ProcessBatches.js
-    TrackBatch.js
-    txError.js
-    artifacts/
-      PharmaSupplyChain.json
-    styles/*.css
-truffle-config.js
-```
-
----
+MIT License — free to use, modify, and distribute.
